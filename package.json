@@ -5,12 +5,18 @@
         "start": "node ."
     },
     "dependencies": {
-        "acorn": "^8.14.0",
-        "acorn-jsx": "^5.3.2",
+        "@babel/traverse": "^7.25.9",
         "colors": "^1.4.0",
         "dotenv": "^16.4.5",
         "openai": "^4.71.1",
         "query-ast": "^1.0.5",
-        "scss-parser": "^1.0.6"
+        "scss-parser": "^1.0.6",
+        "uninstall": "^0.0.0"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.25.9",
+        "@babel/core": "^7.26.0",
+        "@babel/generator": "^7.26.2",
+        "@babel/preset-env": "^7.26.0"
     }
 }

@@ -23,6 +23,6 @@ export class Cache {
 	read = () => {
 		if (!fs.existsSync(this.path)) return;
 
-		this.data = JSON.parse(s.readFileSync(this.path));
+		this.data = JSON.parse(fs.readFileSync(this.path));
 	};
 }

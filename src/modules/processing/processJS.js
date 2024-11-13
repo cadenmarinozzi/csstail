@@ -1,10 +1,11 @@
-import { Parser } from 'acorn';
-import acornJSX from 'acorn-jsx';
 import { isCSSFile } from '../../modules/utils/isFileType.js';
 import fs from 'fs';
 import processCSS from './processCSS.js';
-
-const jsxParser = Parser.extend(acornJSX());
+import * as babelParser from '@babel/parser';
+import _traverse from '@babel/traverse';
+const traverse = _traverse.default;
+import _generate from '@babel/generator';
+const generate = _generate.default;
 
 const processCSSImport = async (importSource, filePath) => {
 	// TODO: Does this change to a different type for require notation?
@@ -20,15 +21,15 @@ const processCSSImport = async (importSource, filePath) => {
 };
 
 export default async (filePath, content) => {
-	const ast = jsxParser.parse(content, {
+	const ast = babelParser.parse(content, {
 		sourceType: 'module',
-		ecmaVersion: '2020',
+		plugins: ['jsx'],
 	});
 
 	const rules = {};
 
 	// Process just the css imports
-	for (const [index, node] of Object.entries(ast.body)) {
+	for (let [index, node] of Object.entries(ast.program.body)) {
 		if (node.type !== 'ImportDeclaration') continue;
 
 		const importSource = node.source.value;
@@ -37,19 +38,40 @@ export default async (filePath, content) => {
 		const ruleMap = await processCSSImport(importSource, filePath);
 		rules[importSource] = ruleMap;
 
-		content = content.slice(0, node.start) + content.slice(node.end);
+		delete ast.program.body[index];
 	}
 
 	// Now apply the rules to convert
+	traverse(ast, {
+		JSXAttribute(path) {
+			const node = path.node;
 
-	for (const style of Object.values(rules)) {
-		for (const [identifier, declarations] of Object.entries(style)) {
-			const declaration = Object.values(declarations).join(' ');
+			if (node.name.name === 'className') {
+				node.value.value = node.value.value
+					.split(' ')
+					.map((name) => {
+						// Replace the css name with the tailwind declaration
+						for (const style of Object.values(rules)) {
+							for (const [
+								identifier,
+								declarations,
+							] of Object.entries(style)) {
+								const declaration =
+									Object.values(declarations).join(' ');
 
-			content = content.replaceAll(identifier, declaration);
-		}
-	}
+								if (name === identifier) name = declaration;
+							}
+						}
+
+						return name;
+					})
+					.join(' ');
+			}
+		},
+	});
+
+	const transformedCode = generate(ast, content).code;
 
 	fs.renameSync(filePath, filePath + '.old');
-	fs.writeFileSync(filePath, content);
+	fs.writeFileSync(filePath, transformedCode);
 };

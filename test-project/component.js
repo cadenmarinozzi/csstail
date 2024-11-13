@@ -1,9 +1,10 @@
-
+import './style.css';
+import './style2.css';
 
 export default class extends Component {
 	render() {
 		return (
-			<div className='second-text-black p-[10px] text-black p-[10px]'>
+			<div className='second-component-style component-style'>
 				Hello, world!
 			</div>
 		);
