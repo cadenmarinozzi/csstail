@@ -1,9 +1,7 @@
 {
     "main": "src/index.js",
     "type": "module",
-    "scripts": {
-        "start": "node ."
-    },
+    "scripts": {},
     "dependencies": {
         "@babel/traverse": "^7.25.9",
         "colors": "^1.4.0",

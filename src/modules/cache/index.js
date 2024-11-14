@@ -1,4 +1,5 @@
 import fs from 'fs';
+import colors from 'colors/safe.js';
 
 export class Cache {
 	constructor(path = './cache.json') {
@@ -23,6 +24,10 @@ export class Cache {
 	read = () => {
 		if (!fs.existsSync(this.path)) return;
 
-		this.data = JSON.parse(fs.readFileSync(this.path));
+		try {
+			this.data = JSON.parse(fs.readFileSync(this.path));
+		} catch {
+			console.log(colors.yellow('Unable to read cache file'));
+		}
 	};
 }

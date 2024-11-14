@@ -1,0 +1,13 @@
+button {
+    border: 1px solid black;
+
+    background: rgba(20, 20, 100, 0l);
+}
+
+.button-big {
+    padding: 10px;
+}
+
+.button-blue {
+    color: #0000ff;
+}

@@ -1,10 +1,10 @@
-import cssToTailwind from '../../modules/OpenAI/completions/cssToTailwind.js';
-import { parse } from 'scss-parser';
-import { Cache } from '../cache/index.js';
+import cssToTailwind from '../../OpenAI/completions/cssToTailwind.js';
+import { Cache } from '../../cache/index.js';
+import colors from 'colors/safe.js';
 
 const cache = new Cache();
 
-const processNode = async (node) => {
+export const processNode = async (node) => {
 	if (node.type !== 'declaration') {
 		return [];
 	}
@@ -21,7 +21,17 @@ const processNode = async (node) => {
 
 		if (statement.type === 'value') {
 			for (const value of statement.value) {
-				declarationStatement += value.value;
+				if (value.type === 'function') {
+					const functionName = value.value[0].value;
+					const functionArgs = value.value[1].value
+						.map((data) => {
+							return data.value;
+						})
+						.join('');
+					declarationStatement += `${functionName}(${functionArgs})`;
+				} else {
+					declarationStatement += value.value;
+				}
 			}
 		}
 	}
@@ -36,14 +46,14 @@ const processNode = async (node) => {
 				`Unable to generate equivalent tailwind statement for: ${declarationStatement}`
 			)
 		);
+	} else {
+		cache.set(declarationStatement, tailwindStatement);
 	}
-
-	cache.set(declarationStatement, tailwindStatement);
 
 	return [declarationStatement, tailwindStatement];
 };
 
-const processRule = async (rule) => {
+export const processRule = async (rule) => {
 	// Process identifier
 	const selector = rule.value[0].value;
 	const selectorStatement = selector[0];
@@ -52,6 +62,8 @@ const processRule = async (rule) => {
 
 	if (selectorStatement.type === 'class') {
 		identifier = selectorStatement.value[0].value; // .class-name without the period
+	} else if (selectorStatement.type === 'identifier') {
+		identifier = selectorStatement.value;
 	}
 
 	if (!identifier) {
@@ -78,23 +90,7 @@ const processRule = async (rule) => {
 		declarationMap[declarationStatement] = tailwindStatement;
 	}
 
-	return [identifier, declarationMap];
-};
+	const declaration = Object.values(declarationMap).join(' ');
 
-export default async (filePath, content) => {
-	const ast = parse(content);
-
-	const ruleMap = {};
-
-	for (const rule of ast.value) {
-		if (rule.type !== 'rule') continue;
-
-		const [identifier, declarationMap] = await processRule(rule);
-
-		ruleMap[identifier] = declarationMap;
-	}
-
-	cache.write();
-
-	return ruleMap;
+	return [identifier, declaration];
 };

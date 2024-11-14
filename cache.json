@@ -1,1 +1,1 @@
-{"color: black":"text-black","padding: 10px":"p-[10px]","display: flex":"flex","flex-direction: column":"flex-col","gap: 10px":"gap-[10px]","justify-content: center":"justify-center"}
+{"color: black":"text-black","padding: 10px":"p-[10px]","display: flex":"flex","flex-direction: column":"flex-col","gap: 10px":"gap-[10px]","justify-content: center":"justify-center","background: [object Object](20, ,,  , 25, ,,  , 20)":"bg-[rgba(20,25,20,1)]","background: [object Object](20, 25, 20)":"bg-[rgb(20,25,20)]"}
