@@ -31,7 +31,7 @@ export const processImports = async (ast, filePath) => {
 		rules[importSource] = ruleMap;
 
 		// Remove the import node since we are no longer using that css file
-		delete ast[index];
+		// delete ast[index];
 	}
 
 	return rules;
